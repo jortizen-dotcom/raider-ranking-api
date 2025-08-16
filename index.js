@@ -1,6 +1,7 @@
-// archivo: index.js
-const express = require('express');
-const axios = require('axios');
+// index.js
+import express from 'express';
+import axios from 'axios';
+
 const app = express();
 
 app.get('/raid-rankings', async (req, res) => {
@@ -26,4 +27,4 @@ app.get('/raid-rankings', async (req, res) => {
   }
 });
 
-module.exports = app;
+export default app;
