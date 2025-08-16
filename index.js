@@ -1,9 +1,9 @@
-import express from 'express';
-import axios from 'axios';
-
+// archivo: index.js
+const express = require('express');
+const axios = require('axios');
 const app = express();
 
-app.get('/', async (req, res) => {
+app.get('/raid-rankings', async (req, res) => {
   try {
     const response = await axios.get('https://raider.io/api/v1/raiding/raid-rankings', {
       params: {
@@ -16,29 +16,14 @@ app.get('/', async (req, res) => {
       }
     });
 
-    const rankings = response.data.rankings;
-    if (!rankings || rankings.length === 0) {
-      return res.send('No se encontraron rankings disponibles.');
-    }
-
-    const formatted = rankings.map(entry => {
-      const guild = entry.guild || {};
-      const name = guild.name || 'Desconocido';
-      const realm = guild.realm || '???';
-      const region = guild.region || '???';
-      const rank = entry.world_rank || '?';
-      const score = entry.score || '?';
-      return `#${rank} - ${name} (${realm}-${region}) - Puntuación: ${score}`;
+    const topGuilds = response.data.rankings.slice(0, 5).map((guild, index) => {
+      return `${index + 1}. ${guild.guild.name} (${guild.realm}) - ${guild.totalKills} kills`;
     });
 
-    res.setHeader('Content-Type', 'text/plain');
-    res.send(formatted.join('\\n'));
+    res.send(topGuilds.join('\n'));
   } catch (error) {
-    res.send('Error al obtener el ranking: ' + error.message);
+    res.status(500).send('Error al obtener datos de Raider.io');
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor activo en el puerto ${PORT}`);
-});
+module.exports = app;
