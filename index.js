@@ -1,9 +1,3 @@
-// index.js
-import express from 'express';
-import axios from 'axios';
-
-const app = express();
-
 app.get('/raid-rankings', async (req, res) => {
   try {
     const response = await axios.get('https://raider.io/api/v1/raiding/raid-rankings', {
@@ -17,14 +11,17 @@ app.get('/raid-rankings', async (req, res) => {
       }
     });
 
+    if (!response.data || !response.data.rankings) {
+      throw new Error('Datos inesperados de Raider.io');
+    }
+
     const topGuilds = response.data.rankings.slice(0, 5).map((guild, index) => {
-      return `${index + 1}. ${guild.guild.name} (${guild.realm}) - ${guild.totalKills} kills`;
+      return `🏆 ${index + 1}. ${guild.guild.name} (${guild.realm}) - ${guild.totalKills} kills`;
     });
 
-    res.send(topGuilds.join('\n'));
+    res.send(topGuilds.join(' | '));
   } catch (error) {
-    res.status(500).send('Error al obtener datos de Raider.io');
+    console.error('Error en la función:', error.message);
+    res.status(500).send(`Error al obtener datos de Raider.io: ${error.message}`);
   }
 });
-
-export default app;
